@@ -27,27 +27,16 @@ pipeline {
                 synopsysIO(connectors: [
                     io(
                         configName: 'poc-io',
-                        projectName: 'insecure-bank',
+                        projectName: 'devsecops-insec-bank',
                         workflowVersion: '2022.4.1'),
                     github(
                         branch: 'master',
                         configName: 'poc-github',
                         owner: 'io-poc',
                         repositoryName: 'poc-18'), 
-                    jira(
-                        assignee: 'iouser@synopsys.com', 
-                        configName: 'poc-jira', 
-                        issueQuery: 'resolution=Unresolved', 
-                        projectKey: 'INSEC', 
-                        projectName: 'insecure-bank'), 
-                    blackduck(
-                        configName: 'poc-bd',
-                        projectName: 'insecure-bank',
-                        projectVersion: '1.0')]) {
-                        
+                    ]) {
                         sh 'io --stage io Persona.Type=devsecops Project.Release.Type=minor'
-                        }
-                
+                    }
 
                 script {
                     def prescriptionJSON = readJSON file: 'io_state.json'
@@ -61,24 +50,37 @@ pipeline {
 
                 }
             }
+        }
 
-
-        /*stage('SAST - Polaris') {
+        
+        stage('SAST- RapidScan') { environment {
+            OSTYPE='linux-gnu' }
             when {
-                expression { isSASTEnabled }
+               expression { isSASTEnabled }
             }
             steps {
-                echo 'Running SAST using Polaris'
-                synopsysIO(connectors: [
-                    [$class: 'PolarisPipelineConfig',
-                    configName: 'poc-polaris',
-                    projectName: 'insecure-bank']]) {
-                    sh 'io --stage execution --state io_state.json'
-                }
+                echo 'Running SAST using Sigma - Rapid Scan'
+                echo env.OSTYPE
+                synopsysIO(connectors: [rapidScan(configName: 'poc-sigma')]) {
+                sh 'io --stage execution --state io_state.json' }
+            }
+        }
+        
+        /*stage('SAST - Coverity') {
+          when {
+            expression { isSASTEnabled }
+          }
+          steps {
+            echo 'Running SAST using Coverity'
+            synopsysIO(connectors: [
+            coverity(configName: 'poc-coverity'
+            )]) {
+              sh 'io --stage execution --state io_state.json'
+              }
             }
         }*/
 
-        stage('Manual Code Review') {
+        stage('SAST Plus Manual') {
             when {
                 expression { isSASTPlusMEnabled }
             }
@@ -86,7 +88,7 @@ pipeline {
                 script {
                     input message: 'Manual source code review (SAST - Manual) triggered by IO. Proceed?'
                 }
-                echo "Out-of-Band Activity - Manual Code Review triggered & approved"
+                echo "Out-of-Band Activity - SAST Plus Manual triggered & approved"
             }
         } 
 
@@ -98,22 +100,22 @@ pipeline {
               echo 'Running SCA using BlackDuck'
               synopsysIO(connectors: [
                   blackduck(configName: 'poc-bd',
-                  projectName: 'insecure-bank',
+                  projectName: 'insec-bank',
                   projectVersion: '1.0')]) {
                   sh 'io --stage execution --state io_state.json'
               }
             }
         } 
 
-        stage('Penetration Test') {
+        stage('DAST Plus Manual') {
             when {
                 expression { isDASTPlusMEnabled }
             }
             steps {
                 script {
-                    input message: 'Manual Penetration Test triggered by IO. Proceed?'
+                    input message: 'Manual threat-modeling (DAST - Manual) triggered by IO. Proceed?'
                 }
-                echo "Out-of-Band Activity - Penetration Test triggered & approved"
+                echo "Out-of-Band Activity - DAST Plus Manual triggered & approved"
             }
         }
 
@@ -121,9 +123,10 @@ pipeline {
             steps {
                 echo 'Execute Workflow Stage'
                 synopsysIO(connectors: [
-                    codeDx(configName: 'poc-codedx', projectId: '1'), 
+                    //codeDx(configName: 'poc-codedx', projectId: '1'), 
+                    jira(assignee: 'iouser@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
+                    //msteams(configName: 'poc-msteams'),
                     slack(configName: 'poc-slack')
-                    //jira(assignee: 'karn@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
                 ]) {
                     sh 'io --stage workflow --state io_state.json'
                 }
@@ -142,9 +145,9 @@ pipeline {
 
                     def workflowJSON = readJSON file: 'wf-output.json'
                     
+                    
                     //Build Breaker
                     if(workflowJSON.breaker.status==true) {
-                          echo "Insecure-Bank has identified vulnerabilities and it requires your attention!"
                           //exit 1
                     }
                     
@@ -165,5 +168,5 @@ pipeline {
             }
         } 
     }
-  }
+
 }
