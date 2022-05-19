@@ -1,0 +1,10 @@
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/login HTTP/1.1" 200 3981
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/css/bootstrap.min.css HTTP/1.1" 200 109518
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/css/ionicons.min.css HTTP/1.1" 200 42960
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/css/skins/blue-light-nav.css HTTP/1.1" 200 2278
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/css/font-awesome.min.css HTTP/1.1" 200 21953
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/css/google-fonts.css HTTP/1.1" 200 11673
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/js/jquery/jquery-2.1.0.min.js HTTP/1.1" 200 83650
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/css/main.css HTTP/1.1" 200 239344
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/js/queen-form-layouts.js HTTP/1.1" 200 1096
+127.0.0.1 - - [30/Mar/2022:07:56:54 -0700] "GET /insecure-bank/resources/js/bootstrap/bootstrap.js HTTP/1.1" 200 60681
