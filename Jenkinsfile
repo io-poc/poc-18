@@ -33,7 +33,7 @@ pipeline {
                         branch: 'master',
                         configName: 'poc-github',
                         owner: 'io-poc',
-                        repositoryName: 'poc-18')
+                        repositoryName: 'poc-18'),
                     blackduck(
                         configName: 'poc-bd'
                         projectName: 'insecure-bank',
