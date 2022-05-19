@@ -47,7 +47,7 @@ pipeline {
                         
                         sh 'io --stage io Persona.Type=devsecops Project.Release.Type=minor'
                         }
-                }
+                
 
                 script {
                     def prescriptionJSON = readJSON file: 'io_state.json'
