@@ -27,14 +27,18 @@ pipeline {
                 synopsysIO(connectors: [
                     io(
                         configName: 'poc-io',
-                        projectName: 'devsecops-insec-bank',
+                        projectName: 'insecure-bank',
                         workflowVersion: '2022.4.1'),
                     github(
                         branch: 'master',
                         configName: 'poc-github',
                         owner: 'io-poc',
-                        repositoryName: 'poc-18'), 
-                    ]) {
+                        repositoryName: 'poc-18')
+                    blackduck(
+                        configName: 'poc-bd'
+                        projectName: 'insecure-bank',
+                        projectVersion: '1.0'
+                    )]) {
                         sh 'io --stage io Persona.Type=devsecops Project.Release.Type=minor'
                     }
 
@@ -53,7 +57,7 @@ pipeline {
         }
 
         
-        stage('SAST- RapidScan') { environment {
+        /*stage('SAST- RapidScan') { environment {
             OSTYPE='linux-gnu' }
             when {
                expression { isSASTEnabled }
@@ -64,9 +68,9 @@ pipeline {
                 synopsysIO(connectors: [rapidScan(configName: 'poc-sigma')]) {
                 sh 'io --stage execution --state io_state.json' }
             }
-        }
+        } 
         
-        /*stage('SAST - Coverity') {
+        stage('SAST - Coverity') {
           when {
             expression { isSASTEnabled }
           }
@@ -80,15 +84,15 @@ pipeline {
             }
         }*/
 
-        stage('SAST Plus Manual') {
+        stage('Manual Code Review ') {
             when {
                 expression { isSASTPlusMEnabled }
             }
             steps {
                 script {
-                    input message: 'Manual source code review (SAST - Manual) triggered by IO. Proceed?'
+                    input message: 'Manual source code review triggered by IO. Proceed?'
                 }
-                echo "Out-of-Band Activity - SAST Plus Manual triggered & approved"
+                echo "Out-of-Band Activity - Manual Code Review triggered & approved"
             }
         } 
 
@@ -100,22 +104,22 @@ pipeline {
               echo 'Running SCA using BlackDuck'
               synopsysIO(connectors: [
                   blackduck(configName: 'poc-bd',
-                  projectName: 'insec-bank',
+                  projectName: 'insecure-bank',
                   projectVersion: '1.0')]) {
                   sh 'io --stage execution --state io_state.json'
               }
             }
         } 
 
-        stage('DAST Plus Manual') {
+        stage('Penetration Test') {
             when {
                 expression { isDASTPlusMEnabled }
             }
             steps {
                 script {
-                    input message: 'Manual threat-modeling (DAST - Manual) triggered by IO. Proceed?'
+                    input message: 'Penetration Test triggered by IO. Proceed?'
                 }
-                echo "Out-of-Band Activity - DAST Plus Manual triggered & approved"
+                echo "Out-of-Band Activity - Penetration Test triggered & approved"
             }
         }
 
@@ -125,7 +129,6 @@ pipeline {
                 synopsysIO(connectors: [
                     //codeDx(configName: 'poc-codedx', projectId: '1'), 
                     jira(assignee: 'iouser@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
-                    //msteams(configName: 'poc-msteams'),
                     slack(configName: 'poc-slack')
                 ]) {
                     sh 'io --stage workflow --state io_state.json'
