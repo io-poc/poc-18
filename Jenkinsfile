@@ -35,10 +35,10 @@ pipeline {
                         owner: 'io-poc',
                         repositoryName: 'poc-18'),
                     blackduck(
-                        configName: 'poc-bd'
+                        configName: 'poc-bd',
                         projectName: 'insecure-bank',
-                        projectVersion: '1.0'
-                    )]) {
+                        projectVersion: '1.0')
+                    ]) {
                         sh 'io --stage io Persona.Type=devsecops Project.Release.Type=minor'
                     }
 
