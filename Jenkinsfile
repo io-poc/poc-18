@@ -34,10 +34,7 @@ pipeline {
                         configName: 'poc-github',
                         owner: 'io-poc',
                         repositoryName: 'poc-18'),
-                    blackduck(
-                        configName: 'poc-bd',
-                        projectName: 'insecure-bank',
-                        projectVersion: '1.0')
+                    
                     ]) {
                         sh 'io --stage io Persona.Type=devsecops Project.Release.Type=minor'
                     }
@@ -103,9 +100,10 @@ pipeline {
             steps {
               echo 'Running SCA using BlackDuck'
               synopsysIO(connectors: [
-                  blackduck(configName: 'poc-bd',
-                  projectName: 'insecure-bank',
-                  projectVersion: '1.0')]) {
+                  blackduck(
+                      configName: 'poc-bd',
+                      projectName: 'insecure-bank',
+                      projectVersion: '1.0')]) {
                   sh 'io --stage execution --state io_state.json'
               }
             }
@@ -127,9 +125,9 @@ pipeline {
             steps {
                 echo 'Execute Workflow Stage'
                 synopsysIO(connectors: [
-                    //codeDx(configName: 'poc-codedx', projectId: '1'), 
-                    jira(assignee: 'iouser@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
-                    slack(configName: 'poc-slack')
+                    codeDx(configName: 'poc-codedx', projectId: '1'), 
+//                     jira(assignee: 'iouser@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
+//                     slack(configName: 'poc-slack')
                 ]) {
                     sh 'io --stage workflow --state io_state.json'
                 }
