@@ -114,6 +114,16 @@ pipeline {
               }
             }
         }*/
+        
+        
+        stage('SAST - Polaris') {
+            when {
+                expression { isSASTEnabled }
+            }
+            steps {
+              echo 'Running SAST using Polaris'
+            }
+        } 
 
         stage('Manual Code Review ') {
             when {
