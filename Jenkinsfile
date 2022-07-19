@@ -158,17 +158,19 @@ pipeline {
         stage('IO - Workflow') {
             steps {
                 echo 'Execute Workflow Stage'
-                synopsysIO(connectors: [
-                    io(
-                        configName: 'poc-io',
-                        projectName: 'insecure-bank',
-                        workflowVersion: '2022.4.1'),
-                    codeDx(configName: 'poc-codedx', projectId: '1'), 
-//                     jira(assignee: 'iouser@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
-//                     slack(configName: 'poc-slack')
-                ]) {
-                    sh 'io --stage workflow --state io_state.json'
-                }
+//                 synopsysIO(connectors: [
+//                     io(
+//                         configName: 'poc-io',
+//                         projectName: 'insecure-bank',
+//                         workflowVersion: '2022.4.1'),
+//                     codeDx(configName: 'poc-codedx', projectId: '1'), 
+// //                     jira(assignee: 'iouser@synopsys.com', configName: 'poc-jira', issueQuery: 'resolution=Unresolved AND labels in (Security, Defect)', projectKey: 'INSEC'), 
+// //                     slack(configName: 'poc-slack')
+//                 ]) {
+//                     sh 'io --stage workflow --state io_state.json'
+//                 }
+                script {
+                    print("io --stage workflow --state io_state.json")
             }
         }
         
@@ -194,9 +196,10 @@ pipeline {
                         if (breakBuild) {
                             input message: 'Build-breaker criteria met.'
                         }
-                    } else {
-                        print('No output from the Workflow Engine. No sign-off required.')
                     }
+//                     else {
+//                         print('No output from the Workflow Engine. No sign-off required.')
+//                     }
                 }
             }
         } 
