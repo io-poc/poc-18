@@ -1,9 +1,16 @@
+// IO Prescription Placeholders
+def runId
 def isSASTEnabled
 def isSASTPlusMEnabled
 def isSCAEnabled
 def isDASTEnabled
 def isDASTPlusMEnabled
-
+def isImageScanEnabled
+def isNetworkScanEnabled
+def isCloudReviewEnabled
+def isThreatModelEnabled
+def isInfraReviewEnabled
+def breakBuild
 
 pipeline {
     agent any
