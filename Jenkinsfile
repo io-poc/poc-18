@@ -50,6 +50,7 @@ pipeline {
                     // IO-IQ will write the prescription to io_state JSON
                     if (fileExists('io_state.json')) {
                         def prescriptionJSON = readJSON file: 'io_state.json'
+                        echo("${prescriptionJSON}")
 
                         // Pretty-print Prescription JSON
                         // def prescriptionJSONFormat = JsonOutput.toJson(prescriptionJSON)
@@ -76,10 +77,10 @@ pipeline {
                         isDASTEnabled = prescriptionJSON.data.prescription.security.activities.dast.enabled
                         isDASTPlusMEnabled = prescriptionJSON.data.prescription.security.activities.dastPlusM.enabled
                         isImageScanEnabled = prescriptionJSON.data.prescription.security.activities.imageScan.enabled
-                        isNetworkScanEnabled = prescriptionJSON.data.prescription.security.activities.NETWORK.enabled
-                        isCloudReviewEnabled = prescriptionJSON.data.prescription.security.activities.CLOUD.enabled
-                        isThreatModelEnabled = prescriptionJSON.data.prescription.security.activities.THREATMODEL.enabled
-                        isInfraReviewEnabled = prescriptionJSON.data.prescription.security.activities.INFRA.enabled
+//                         isNetworkScanEnabled = prescriptionJSON.data.prescription.security.activities.NETWORK.enabled
+//                         isCloudReviewEnabled = prescriptionJSON.data.prescription.security.activities.CLOUD.enabled
+//                         isThreatModelEnabled = prescriptionJSON.data.prescription.security.activities.THREATMODEL.enabled
+//                         isInfraReviewEnabled = prescriptionJSON.data.prescription.security.activities.INFRA.enabled
                     } else {
                         error('IO prescription JSON not found.')
                     }
