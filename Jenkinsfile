@@ -39,20 +39,46 @@ pipeline {
                         sh 'io --stage io Persona.Type=devsecops Project.Release.Type=minor'
                     }
 
-                script {
-                    def prescriptionJSON = readJSON file: 'io_state.json'
+                 script {
+                    // IO-IQ will write the prescription to io_state JSON
+                    if (fileExists('io_state.json')) {
+                        def prescriptionJSON = readJSON file: 'io_state.json'
 
-                    isSASTEnabled = prescriptionJSON.data.prescription.security.activities.sast.enabled
-                    isSASTPlusMEnabled = prescriptionJSON.data.prescription.security.activities.sastPlusM.enabled
-                    isSCAEnabled = prescriptionJSON.data.prescription.security.activities.sca.enabled
-                    isDASTEnabled = prescriptionJSON.data.prescription.security.activities.dast.enabled
-                    isDASTPlusMEnabled = prescriptionJSON.data.prescription.security.activities.dastPlusM.enabled
-                    isImageScanEnabled = prescriptionJSON.data.prescription.security.activities.imageScan.enabled
+                        // Pretty-print Prescription JSON
+                        // def prescriptionJSONFormat = JsonOutput.toJson(prescriptionJSON)
+                        // prettyJSON = JsonOutput.prettyPrint(prescriptionJSONFormat)
+                        // echo("${prettyJSON}")
 
+                        // Use the run Id from IO IQ to get detailed message/explanation on prescription
+//                         runId = prescriptionJSON.data.io.run.id
+//                         def apiURL = ioServerURL + ioRunAPI + runId
+//                         def res = sh(script: "curl --location --request GET ${apiURL} --header 'Authorization: Bearer ${IO_ACCESS_TOKEN}'", returnStdout: true)
+
+//                         def jsonSlurper = new JsonSlurper()
+//                         def ioRunJSON = jsonSlurper.parseText(res)
+//                         def ioRunJSONFormat = JsonOutput.toJson(ioRunJSON)
+//                         def ioRunJSONPretty = JsonOutput.prettyPrint(ioRunJSONFormat)
+//                         print("==================== IO-IQ Explanation ======================")
+//                         echo("${ioRunJSONPretty}")
+//                         print("==================== IO-IQ Explanation ======================")
+
+                        // Update security flags based on prescription
+                        isSASTEnabled = prescriptionJSON.data.prescription.security.activities.sast.enabled
+                        isSASTPlusMEnabled = prescriptionJSON.data.prescription.security.activities.sastPlusM.enabled
+                        isSCAEnabled = prescriptionJSON.data.prescription.security.activities.sca.enabled
+                        isDASTEnabled = prescriptionJSON.data.prescription.security.activities.dast.enabled
+                        isDASTPlusMEnabled = prescriptionJSON.data.prescription.security.activities.dastPlusM.enabled
+                        isImageScanEnabled = prescriptionJSON.data.prescription.security.activities.imageScan.enabled
+                        isNetworkScanEnabled = prescriptionJSON.data.prescription.security.activities.NETWORK.enabled
+                        isCloudReviewEnabled = prescriptionJSON.data.prescription.security.activities.CLOUD.enabled
+                        isThreatModelEnabled = prescriptionJSON.data.prescription.security.activities.THREATMODEL.enabled
+                        isInfraReviewEnabled = prescriptionJSON.data.prescription.security.activities.INFRA.enabled
+                    } else {
+                        error('IO prescription JSON not found.')
+                    }
                 }
             }
         }
-
         
         /*stage('SAST- RapidScan') { environment {
             OSTYPE='linux-gnu' }
@@ -131,43 +157,36 @@ pipeline {
                 ]) {
                     sh 'io --stage workflow --state io_state.json'
                 }
-                
-                 script {
-                    def workflowJSON = readJSON file: 'wf-output.json'
-                    print("========================== IO WorkflowEngine Summary ============================")
-                    print("Breaker Status: $workflowJSON.breaker.status")
-                } 
             }
         }
         
         stage('Security Sign-Off') {
             steps {
                 script {
+                    if (fileExists('wf-output.json')) {
+                        def wfJSON = readJSON file: 'wf-output.json'
 
-                    def workflowJSON = readJSON file: 'wf-output.json'
-                    
-                    
-                    //Build Breaker
-                    if(workflowJSON.breaker.status==true) {
-                          //exit 1
-                    }
-                    
-                    codedx_value = workflowJSON.summary.risk_score
-                    for(arr in codedx_value){
-                        if(arr != null)
-                        {   
-                            print("Code Dx Score: $arr")
-                            if(arr < 80)
-                            {
-                                input message: 'Code Dx Score did not meet the defined threshold. Do you wish to proceed?'
-                            }
+                        // If the Workflow Output JSON has a lot of key-values; Jenkins throws a StackOverflow Exception
+                        //  when trying to pretty-print the JSON
+                        // def wfJSONFormat = JsonOutput.toJson(wfJSON)
+                        // def wfJSONPretty = JsonOutput.prettyPrint(wfJSONFormat)
+                        // print("======================== IO Workflow Engine Summary ==========================")
+                        // print(wfJSONPretty)
+                        // print("======================== IO Workflow Engine Summary ==========================")
+
+                        breakBuild = wfJSON.breaker.status
+                        print("========================== Build Breaker Status ============================")
+                        print("Breaker Status: $breakBuild")
+                        print("========================== Build Breaker Status ============================")
+
+                        if (breakBuild) {
+                            input message: 'Build-breaker criteria met.'
                         }
+                    } else {
+                        print('No output from the Workflow Engine. No sign-off required.')
                     }
-                    
                 }
-                echo "Security Sign-Off triggered & approved"
             }
         } 
     }
-
 }
